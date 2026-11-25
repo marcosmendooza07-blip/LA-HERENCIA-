@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LA HERENCIA | Colección Vintage Exclusiva</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cormorant Garamond (Serif elegante) & Plus Jakarta Sans (Limpia) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#05080f',
+                        midnight: '#0a1122',
+                        navyLux: '#101d3a',
+                        gold: '#d4af37',
+                        goldLight: '#f3e5ab',
+                        goldDark: '#aa8822',
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-obsidian text-slate-200 font-sans antialiased selection:bg-gold selection:text-obsidian min-h-screen flex flex-col">
+
+    <!-- Notificación Toast Flotante -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Barra Superior de Estado Desarrollador (Visible solo cuando está activa) -->
+    <div id="dev-banner" class="hidden bg-gradient-to-r from-amber-900/90 via-yellow-800/90 to-amber-900/90 border-b border-gold/50 text-goldLight px-4 py-2.5 text-xs sm:text-sm">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2 font-medium">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-gold"></i>
+                <span>MODO DESARROLLADOR ACTIVO — <span id="sync-status-badge" class="text-emerald-300 font-semibold">Sincronizado</span></span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                <button onclick="downloadUpdatedHtmlForHosting()" class="bg-emerald-700/90 border border-emerald-400/50 text-white font-semibold px-3 py-1 rounded text-xs hover:bg-emerald-600 transition flex items-center gap-1" title="Descarga el archivo listo para subir a Netlify y que se vea en cualquier celular">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Guardar HTML para Celular / Web
+                </button>
+                <button onclick="copyShareClientLink()" class="bg-navyLux border border-gold/50 text-goldLight px-3 py-1 rounded text-xs hover:border-gold hover:text-gold transition flex items-center gap-1">
+                    <i data-lucide="share-2" class="w-3.5 h-3.5 text-gold"></i> Copiar Enlace Cliente
+                </button>
+                <button onclick="openAddProductModal()" class="bg-gold text-obsidian font-semibold px-3 py-1 rounded text-xs hover:bg-goldLight transition flex items-center gap-1">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Agregar Artículo
+                </button>
+                <button onclick="resetDemoStore()" class="bg-obsidian/60 border border-gold/40 text-goldLight px-3 py-1 rounded text-xs hover:bg-obsidian transition">
+                    Restaurar Catálogo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Navegación Principal -->
+    <header class="sticky top-0 z-40 bg-obsidian/90 backdrop-blur-md border-b border-gold/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="#" onclick="filterCategory('Todos'); return false;" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-full border border-gold/60 flex items-center justify-center bg-navyLux group-hover:border-gold transition">
+                        <span class="font-serif text-gold text-xl font-bold tracking-widest">LH</span>
+                    </div>
+                    <div>
+                        <h1 class="font-serif text-2xl sm:text-3xl font-bold tracking-[0.2em] text-white group-hover:text-gold transition">LA HERENCIA</h1>
+                    </div>
+                </a>
+
+                <!-- Navegación Desktop -->
+                <nav id="desktop-nav" class="hidden md:flex items-center gap-1"></nav>
+
+                <!-- Acciones Derecha (Carrito + Menú Móvil) -->
+                <div class="flex items-center gap-2.5 sm:gap-3">
+                    <a href="#contacto" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-navyLux/80 border border-gold/25 hover:border-gold text-xs text-goldLight hover:text-gold transition">
+                        <i data-lucide="phone" class="w-3.5 h-3.5 text-gold"></i>
+                        <span>Contacto</span>
+                    </a>
+
+                    <button onclick="toggleCart()" class="relative p-2.5 rounded-full bg-navyLux border border-gold/30 hover:border-gold text-gold transition group">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 group-hover:scale-105 transition-transform"></i>
+                        <span id="cart-badge" class="absolute -top-1.5 -right-1.5 bg-gold text-obsidian text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md">0</span>
+                    </button>
+
+                    <!-- Botón Menú Hamburguesa Móvil -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-lg bg-navyLux border border-gold/20 text-slate-200 hover:text-gold">
+                        <i data-lucide="menu" class="w-6 h-6" id="mobile-menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menú Desplegable Móvil -->
+        <div id="mobile-menu" class="hidden md:hidden bg-midnight border-b border-gold/20 px-4 pt-2 pb-5 space-y-2">
+            <!-- Generado dinámicamente -->
+        </div>
+    </header>
+
+    <!-- Hero Section Exclusivo -->
+    <section class="relative overflow-hidden bg-gradient-to-b from-midnight via-obsidian to-obsidian border-b border-gold/15">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 relative z-10 text-center">
+            <span class="inline-block py-1 px-4 rounded-full border border-gold/40 bg-navyLux/60 text-gold text-xs tracking-[0.25em] uppercase mb-4">
+                Piezas Únicas &bull; Autenticidad Garantizada
+            </span>
+            <h2 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-4 leading-tight">
+                El Arte de lo <span class="text-gold italic font-normal">Atemporal</span>
+            </h2>
+            <p class="max-w-2xl mx-auto text-slate-400 text-sm sm:text-base font-light leading-relaxed mb-8">
+                Descubre una selección irrepetible de relojería clásica, gafas de diseñador de época, vinilos de primera edición y tesoros retro. Cada pieza es única: una vez adquirida, pasa a manos de su nuevo coleccionista.
+            </p>
+            
+            <!-- Filtros Rápidos Estilo Píldora -->
+            <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3" id="pill-filters">
+                <!-- Generado dinámicamente -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Panel Resumen de Ventas (Solo visible en Modo Desarrollador) -->
+    <section id="dev-stats-panel" class="hidden max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8">
+        <div class="bg-navyLux/80 border border-gold/30 rounded-2xl p-6 shadow-2xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gold/15 pb-4">
+                <div>
+                    <h3 class="font-serif text-2xl text-gold font-semibold flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-6 h-6"></i> Panel de Control del Desarrollador
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Monitoreo de piezas vendidas, ingresos y sincronización con dispositivos móviles.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <div class="bg-obsidian/80 border border-gold/20 rounded-xl p-4">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Ingresos Totales</p>
+                    <p id="stat-revenue" class="font-serif text-3xl font-bold text-gold mt-1">$0.00</p>
+                </div>
+                <div class="bg-obsidian/80 border border-gold/20 rounded-xl p-4">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Artículos Vendidos</p>
+                    <p id="stat-sold-count" class="font-serif text-3xl font-bold text-emerald-400 mt-1">0</p>
+                </div>
+                <div class="bg-obsidian/80 border border-gold/20 rounded-xl p-4">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider">Disponibles en Tienda</p>
+                    <p id="stat-available-count" class="font-serif text-3xl font-bold text-white mt-1">0</p>
+                </div>
+            </div>
+
+            <!-- Historial de Transacciones -->
+            <div>
+                <h4 class="text-xs uppercase tracking-widest text-gold mb-3 font-semibold">Últimas Ventas Registradas</h4>
+                <div id="sales-history-list" class="space-y-2 max-h-48 overflow-y-auto pr-1 text-sm">
+                    <p class="text-slate-500 italic text-xs">Aún no se han realizado ventas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catálogo Principal de Productos -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 border-b border-gold/15 pb-4">
+            <div>
+                <p class="text-gold text-xs uppercase tracking-[0.2em] mb-1">Catálogo Curado</p>
+                <h3 id="current-category-title" class="font-serif text-3xl sm:text-4xl text-white font-semibold">Toda la Colección</h3>
+            </div>
+            <p id="products-counter" class="text-sm text-slate-400">Mostrando 0 piezas exclusivas</p>
+        </div>
+
+        <!-- Grid Responsivo de Productos -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+            <!-- Tarjetas generadas dinámicamente por JS -->
+        </div>
+
+        <!-- Estado Vacío -->
+        <div id="empty-state" class="hidden text-center py-20 bg-midnight/50 rounded-2xl border border-gold/15">
+            <i data-lucide="sparkles" class="w-12 h-12 text-gold/50 mx-auto mb-4"></i>
+            <h4 class="font-serif text-2xl text-white mb-2">Todas las piezas de esta sección han sido adquiridas</h4>
+            <p class="text-slate-400 text-sm max-w-md mx-auto mb-6">Nuestro catálogo se compone de piezas únicas. Explora otras categorías o vuelve pronto para nuevas curadurías.</p>
+            <button onclick="filterCategory('Todos')" class="px-6 py-2.5 bg-gold text-obsidian font-semibold rounded-lg hover:bg-goldLight transition text-sm">
+                Ver Piezas Disponibles
+            </button>
+        </div>
+    </main>
+
+    <!-- Apartado de Contacto y Atención Privada -->
+    <section id="contacto" class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6">
+        <div class="bg-gradient-to-r from-midnight via-navyLux/90 to-midnight border border-gold/30 rounded-2xl p-6 sm:p-10 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
+            <div class="space-y-2 max-w-xl">
+                <span class="inline-flex items-center gap-1.5 text-gold text-xs uppercase tracking-[0.2em]">
+                    <i data-lucide="concierge-bell" class="w-4 h-4"></i> Atención Personalizada
+                </span>
+                <h3 class="font-serif text-3xl sm:text-4xl text-white font-semibold">Contacto Directo</h3>
+                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                    ¿Buscas una pieza vintage en especial, tienes dudas sobre algún artículo o deseas coordinar una entrega privada? Comunícate directamente con nosotros.
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full lg:w-auto justify-center">
+                <a href="tel:+525579466516" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-obsidian border border-gold/40 hover:border-gold text-goldLight hover:text-gold transition font-medium text-sm shadow-lg">
+                    <i data-lucide="phone-call" class="w-4 h-4 text-gold"></i>
+                    <span class="tracking-wider font-mono text-base">55 7946 6516</span>
+                </a>
+                <a href="https://wa.me/525579466516?text=Hola%2C%20me%20interesa%20una%20pieza%20de%20LA%20HERENCIA" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-goldDark via-gold to-goldDark text-obsidian font-bold hover:brightness-110 transition text-sm shadow-lg">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    <span>Escribir por WhatsApp</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Elegante con Acceso Discreto a Modo Desarrollador -->
+    <footer class="bg-midnight border-t border-gold/20 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center md:text-left">
+                <div>
+                    <h4 class="font-serif text-2xl font-bold tracking-[0.2em] text-white">LA HERENCIA</h4>
+                    <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                        Boutique privada de artículos vintage de colección. Envío asegurado y certificado de autenticidad en cada orden.
+                    </p>
+                    <a href="tel:+525579466516" class="inline-flex items-center gap-1.5 text-xs text-gold hover:text-goldLight mt-3 font-mono">
+                        <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+                        <span>Tel / WhatsApp: 55 7946 6516</span>
+                    </a>
+                </div>
+                <div class="flex flex-wrap justify-center gap-4 text-xs text-slate-400">
+                    <button onclick="filterCategory('Vintage')" class="hover:text-gold transition">Vintage</button>
+                    <span>&bull;</span>
+                    <button onclick="filterCategory('Vinilos')" class="hover:text-gold transition">Vinilos</button>
+                    <span>&bull;</span>
+                    <button onclick="filterCategory('Relojes')" class="hover:text-gold transition">Relojes</button>
+                    <span>&bull;</span>
+                    <button onclick="filterCategory('Lentes')" class="hover:text-gold transition">Lentes</button>
+                </div>
+                <div class="flex flex-col items-center md:items-end gap-3">
+                    <!-- Interruptor Modo Desarrollador (Oculto cuando se entra por enlace compartido de cliente) -->
+                    <button onclick="handleDevButtonClick()" id="dev-mode-btn" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-obsidian border border-gold/30 hover:border-gold text-xs text-slate-300 hover:text-gold transition shadow-inner">
+                        <i data-lucide="key-round" class="w-3.5 h-3.5 text-gold"></i>
+                        <span id="dev-mode-btn-text">Modo Desarrollador / Admin</span>
+                    </button>
+                    <p class="text-[11px] text-slate-500">&copy; 2026 LA HERENCIA Vintage. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL CÓDIGO DE ACCESO ADMINISTRADOR (0709)                           -->
+    <!-- ===================================================================== -->
+    <div id="admin-pin-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-midnight border border-gold/40 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center">
+            <div class="w-12 h-12 rounded-full bg-navyLux border border-gold/40 flex items-center justify-center mx-auto mb-4 text-gold">
+                <i data-lucide="lock" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-serif text-2xl text-white font-semibold mb-1">Acceso Privado Admin</h3>
+            <p class="text-xs text-slate-400 mb-5">Ingresa tu código de 4 dígitos para administrar el catálogo.</p>
+            <form onsubmit="verifyAdminPin(event)" class="space-y-4">
+                <input type="password" id="admin-pin-input" inputmode="numeric" maxlength="4" required placeholder="••••" class="w-full bg-obsidian border border-gold/40 rounded-xl px-4 py-3 text-center text-2xl tracking-[0.5em] text-gold font-mono outline-none focus:border-gold">
+                <div class="flex gap-2.5">
+                    <button type="button" onclick="closeAdminPinModal()" class="w-1/2 py-2.5 rounded-xl bg-obsidian border border-gold/20 text-slate-300 text-xs hover:text-white transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-gold text-obsidian font-bold text-xs hover:bg-goldLight transition">
+                        Entrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL DETALLE DE PRODUCTO                                             -->
+    <!-- ===================================================================== -->
+    <div id="product-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-midnight border border-gold/40 rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl relative my-8">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-obsidian/90 border border-gold/30 text-slate-300 hover:text-gold flex items-center justify-center transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div id="product-modal-content" class="grid grid-cols-1 md:grid-cols-2">
+                <!-- Generado dinámicamente por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- DRAWER CARRITO DE COMPRAS Y PAGO CON TARJETA                          -->
+    <!-- ===================================================================== -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex justify-end">
+        <div class="bg-midnight border-l border-gold/30 w-full max-w-md h-full flex flex-col shadow-2xl">
+            <!-- Encabezado del Drawer -->
+            <div class="p-5 border-b border-gold/20 flex items-center justify-between bg-obsidian/50">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-gold"></i>
+                    <h3 id="drawer-title" class="font-serif text-2xl text-white font-semibold">Tu Selección</h3>
+                </div>
+                <button onclick="toggleCart()" class="p-2 rounded-full text-slate-400 hover:text-gold hover:bg-navyLux transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Paso 1: Lista de Artículos en Bolsa -->
+            <div id="cart-step-items" class="flex-grow flex flex-col overflow-hidden">
+                <div id="cart-items-container" class="flex-grow overflow-y-auto p-5 space-y-3">
+                    <!-- Artículos generados dinámicamente -->
+                </div>
+
+                <div id="cart-footer" class="p-5 border-t border-gold/20 bg-obsidian/80 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs uppercase tracking-widest text-slate-400">Total a Invertir</span>
+                        <span id="cart-total-price" class="font-serif text-2xl font-bold text-gold">$0.00</span>
+                    </div>
+                    <button onclick="proceedToCheckout()" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-goldDark via-gold to-goldDark text-obsidian font-bold hover:brightness-110 transition shadow-lg flex items-center justify-center gap-2 text-sm">
+                        <i data-lucide="credit-card" class="w-4 h-4"></i>
+                        <span>Proceder al Pago con Tarjeta</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Paso 2: Formulario de Pago con Tarjeta -->
+            <div id="cart-step-checkout" class="hidden flex-grow overflow-y-auto p-5 space-y-5">
+                <button onclick="backToCartItems()" class="text-xs text-gold hover:underline flex items-center gap-1">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Volver a mi bolsa
+                </button>
+
+                <!-- Vista Previa Interactiva de Tarjeta -->
+                <div class="bg-gradient-to-br from-navyLux via-obsidian to-midnight border border-gold/40 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="font-serif text-gold text-sm tracking-[0.25em] font-bold">LA HERENCIA PRIVÉ</span>
+                        <i data-lucide="wifi" class="w-5 h-5 text-gold/70 rotate-90"></i>
+                    </div>
+                    <p id="card-preview-number" class="font-mono text-lg sm:text-xl tracking-widest text-white mb-5">•••• •••• •••• ••••</p>
+                    <div class="flex justify-between items-end text-xs">
+                        <div>
+                            <span class="text-[9px] text-slate-400 uppercase block">Titular</span>
+                            <span id="card-preview-name" class="text-goldLight font-medium uppercase tracking-wider">NOMBRE DEL TITULAR</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[9px] text-slate-400 uppercase block">Expira</span>
+                            <span id="card-preview-expiry" class="text-goldLight font-mono">MM/AA</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="payment-form" onsubmit="processCardPayment(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-300 uppercase mb-1">Nombre Completo del Titular</label>
+                        <input type="text" id="card-name" required oninput="updateCardPreview()" placeholder="Como aparece en la tarjeta" class="w-full bg-obsidian border border-gold/30 rounded-lg px-3.5 py-2.5 text-sm text-white outline-none focus:border-gold">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 uppercase mb-1">Número de Tarjeta</label>
+                        <input type="text" id="card-number" required maxlength="19" oninput="formatCardNumber(this); updateCardPreview()" placeholder="4532 •••• •••• ••••" class="w-full bg-obsidian border border-gold/30 rounded-lg px-3.5 py-2.5 text-sm text-white font-mono outline-none focus:border-gold">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs text-slate-300 uppercase mb-1">Expiración</label>
+                            <input type="text" id="card-expiry" required maxlength="5" oninput="formatExpiry(this); updateCardPreview()" placeholder="MM/AA" class="w-full bg-obsidian border border-gold/30 rounded-lg px-3.5 py-2.5 text-sm text-white font-mono outline-none focus:border-gold">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 uppercase mb-1">CVV</label>
+                            <input type="password" id="card-cvv" required maxlength="4" placeholder="•••" class="w-full bg-obsidian border border-gold/30 rounded-lg px-3.5 py-2.5 text-sm text-white font-mono outline-none focus:border-gold">
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-gold/15 flex items-center justify-between">
+                        <span class="text-xs text-slate-400 uppercase">Total a Cargar:</span>
+                        <span id="checkout-final-amount" class="font-serif text-2xl font-bold text-gold">$0.00</span>
+                    </div>
+
+                    <button type="submit" id="pay-submit-btn" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-goldDark via-gold to-goldDark text-obsidian font-bold hover:brightness-110 transition shadow-lg flex items-center justify-center gap-2 text-sm">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                        <span>Confirmar Pago Seguro</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL AGREGAR NUEVO ARTÍCULO (Solo Modo Desarrollador)                -->
+    <!-- ===================================================================== -->
+    <div id="add-product-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-midnight border border-gold/40 rounded-2xl max-w-md w-full p-6 shadow-2xl my-6">
+            <div class="flex justify-between items-center mb-4 border-b border-gold/20 pb-3">
+                <h3 class="font-serif text-2xl text-gold font-semibold">Nuevo Artículo de Colección</h3>
+                <button onclick="closeAddProductModal()" class="text-slate-400 hover:text-gold"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="handleAddNewProduct(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-slate-300 uppercase mb-1">Nombre del Artículo</label>
+                    <input type="text" id="new-title" required placeholder="Ej. Omega Seamaster 1968" class="w-full bg-obsidian border border-gold/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-gold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-slate-300 uppercase mb-1">Categoría</label>
+                        <select id="new-category" class="w-full bg-obsidian border border-gold/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-gold">
+                            <option value="Relojes">Relojes</option>
+                            <option value="Lentes">Lentes</option>
+                            <option value="Vinilos">Vinilos</option>
+                            <option value="Vintage">Vintage</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-300 uppercase mb-1">Precio (USD)</label>
+                        <input type="number" id="new-price" required min="1" step="0.01" placeholder="450" class="w-full bg-obsidian border border-gold/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-gold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-300 uppercase mb-1">Año / Época</label>
+                    <input type="text" id="new-era" required placeholder="Ej. Década de 1970 • Suiza" class="w-full bg-obsidian border border-gold/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-gold">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-300 uppercase mb-1">Fotografía del Artículo</label>
+                    <label for="new-image-file" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gold/35 hover:border-gold rounded-xl bg-obsidian/80 cursor-pointer transition overflow-hidden relative group">
+                        <img id="new-image-preview" src="" alt="Vista previa" class="hidden w-full h-full object-cover">
+                        <div id="new-image-placeholder" class="flex flex-col items-center justify-center text-center p-3">
+                            <i data-lucide="image-plus" class="w-6 h-6 text-gold mb-1.5 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs text-goldLight font-medium">Seleccionar foto de tus archivos</span>
+                            <span class="text-[10px] text-slate-400 mt-0.5">JPG, PNG o WEBP</span>
+                        </div>
+                    </label>
+                    <input type="file" id="new-image-file" accept="image/*" onchange="handleProductImageUpload(event)" class="hidden">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-300 uppercase mb-1">Descripción Detallada</label>
+                    <textarea id="new-desc" required rows="3" placeholder="Detalles de conservación, materiales, historia..." class="w-full bg-obsidian border border-gold/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-gold"></textarea>
+                </div>
+                <button type="submit" class="w-full py-3 bg-gold text-obsidian font-bold rounded-xl hover:bg-goldLight transition">
+                    Publicar en la Boutique
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- LÓGICA DE LA APLICACIÓN + SINCRONIZACIÓN EN TIEMPO REAL               -->
+    <!-- ===================================================================== -->
+    <script>
+        // 1. CATÁLOGO INICIAL CURADO (Categorías: Vintage, Vinilos, Relojes, Lentes)
+        const INITIAL_PRODUCTS = [
+            {
+                id: 'rel-01',
+                title: 'Cronógrafo Suizo Zenith 1969',
+                category: 'Relojes',
+                price: 1250.00,
+                era: '1969 • Manufactura Suiza',
+                image: 'https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=800&q=80',
+                description: 'Caja chapada en oro de 18k con esfera champán envejecida naturalmente. Movimiento mecánico de cuerda manual recién calibrado por maestros relojeros. Incluye correa de piel de becerro italiana.',
+                sold: false,
+                soldAt: null,
+                buyerName: null
+            },
+            {
+                id: 'len-01',
+                title: 'Gafas Persol Ratti Torino Tortoiseshell',
+                category: 'Lentes',
+                price: 380.00,
+                era: 'Década de 1980 • Italia',
+                image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=800&q=80',
+                description: 'Montura artesanal en acetato carey con el icónico sistema flexible Meflecto en las varillas. Cristales minerales templados en tono ámbar con protección UV intacta y estuche original.',
+                sold: false,
+                soldAt: null,
+                buyerName: null
+            },
+            {
+                id: 'vin-01',
+                title: 'Miles Davis - Kind of Blue (Prensaje 1959)',
+                category: 'Vinilos',
+                price: 290.00,
+                era: '1959 • Columbia Six-Eye Mono',
+                image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=800&q=80',
+                description: 'Edición histórica de colección en vinilo de 180 gramos. Carpeta original con mínima pátina del tiempo y sonido cálido libre de saltos. Una joya indispensable para audiófilos.',
+                sold: false,
+                soldAt: null,
+                buyerName: null
+            },
+            {
+                id: 'vin-02',
+                title: 'Pink Floyd - The Dark Side of the Moon',
+                category: 'Vinilos',
+                price: 215.00,
+                era: '1973 • Edición UK Harvest',
+                image: 'https://images.unsplash.com/photo-1539375665275-f9de415ef9ac?auto=format&fit=crop&w=800&q=80',
+                description: 'Prensaje británico temprano con carpeta desplegable negra mate. Conserva acústica profunda y dinámica original de estudio.',
+                sold: false,
+                soldAt: null,
+                buyerName: null
+            },
+            {
+                id: 'vnt-01',
+                title: 'Cámara Leica IIIf Red Dial Telemétrica',
+                category: 'Vintage',
+                price: 940.00,
+                era: '1954 • Wetzlar, Alemania',
+                image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80',
+                description: 'Cuerpo cromado en estado excepcional con obturador de cortina revisado y lente Elmar 50mm f/3.5 retráctil. Totalmente funcional para fotografía analógica de 35mm.',
+                sold: false,
+                soldAt: null,
+                buyerName: null
+            },
+            {
+                id: 'rel-02',
+                title: 'Omega De Ville Tank Rectangular',
+                category: 'Relojes',
+                price: 890.00,
+                era: '1974 • Ginebra',
+                image: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=800&q=80',
+                description: 'Diseño minimalista de caja rectangular ultra delgada con números romanos pintados a mano y corona original firmada.',
+                sold: false,
+                soldAt: null,
+                buyerName: null
+            },
+            {
+                id: 'len-02',
+                title: 'Aviador Bausch & Lomb Ray-Ban 1978',
+                category: 'Lentes',
+                price: 310.00,
+                era: '1978 • USA',
+                image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=800&q=80',
+                description: 'Armazón bañado en oro de 10k con puente grabado "B&L RAY-BAN U.S.A." y cristales verdes G-15 originales.',
+                sold: false,
+                soldAt: null,
+                buyerName: null
+            },
+            {
+                id: 'vnt-02',
+                title: 'Consola Portátil Nintendo Game & Watch (1982)',
+                category: 'Vintage',
+                price: 260.00,
+                era: '1982 • Edición Coleccionista Japón',
+                image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+                description: 'Pieza retro clásica de doble pantalla en perfecto funcionamiento, tapa de baterías original y pantalla LCD nítida.',
+                sold: false,
+                soldAt: null,
+                buyerName: null
+            }
+        ];
+
+        const CATEGORIES = ['Todos', 'Vintage', 'Vinilos', 'Relojes', 'Lentes'];
+
+        // 2. ESTADO GLOBAL CON PERSISTENCIA Y SINCRONIZACIÓN EN LA NUBE
+        let products = [];
+        let cart = [];
+        let salesHistory = [];
+        let currentCategory = 'Todos';
+        let isDevMode = false;
+        let isSharedClientView = false;
+        const ADMIN_ACCESS_PIN = '0709';
+
+        // Referencias de nube (si está disponible en el entorno)
+        let cloudDb = null;
+        let cloudCollectionRef = null;
+        let cloudSalesRef = null;
+        let cloudReady = false;
+        let cloudModules = null;
+
+        function checkSharedClientMode() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('cliente') === '1' || params.get('vista') === 'cliente') {
+                isSharedClientView = true;
+                isDevMode = false;
+                localStorage.removeItem('heritage_dev_mode_v1');
+            }
+        }
+
+        function loadLocalState() {
+            try {
+                const savedProducts = localStorage.getItem('heritage_products_v1');
+                const savedSales = localStorage.getItem('heritage_sales_v1');
+                const savedCart = localStorage.getItem('heritage_cart_v1');
+                const savedDev = localStorage.getItem('heritage_dev_mode_v1');
+
+                products = savedProducts ? JSON.parse(savedProducts) : JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+                salesHistory = savedSales ? JSON.parse(savedSales) : [];
+                cart = savedCart ? JSON.parse(savedCart) : [];
+                isDevMode = isSharedClientView ? false : (savedDev === 'true');
+
+                cart = cart.filter(itemId => {
+                    const p = products.find(prod => prod.id === itemId);
+                    return p && !p.sold;
+                });
+            } catch (e) {
+                products = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+            }
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem('heritage_products_v1', JSON.stringify(products));
+                localStorage.setItem('heritage_sales_v1', JSON.stringify(salesHistory));
+                localStorage.setItem('heritage_cart_v1', JSON.stringify(cart));
+                localStorage.setItem('heritage_dev_mode_v1', String(isDevMode));
+            } catch (err) {
+                // Evitar bloqueo si el almacenamiento local se llena por muchas fotos
+            }
+        }
+
+        // Inicialización segura de sincronización en tiempo real (Computadora <-> Celular)
+        async function initRealtimeCloudSync() {
+            try {
+                if (typeof __firebase_config === 'undefined') return;
+                const firebaseConfig = JSON.parse(__firebase_config);
+                if (!firebaseConfig || !firebaseConfig.apiKey) return;
+
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'la-herencia-store';
+                const [appMod, authMod, fsMod] = await Promise.all([
+                    import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js'),
+                    import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js'),
+                    import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js')
+                ]);
+
+                cloudModules = fsMod;
+                const app = appMod.initializeApp(firebaseConfig);
+                const auth = authMod.getAuth(app);
+                cloudDb = fsMod.getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await authMod.signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await authMod.signInAnonymously(auth);
+                }
+
+                if (!auth.currentUser) return;
+
+                cloudCollectionRef = fsMod.collection(cloudDb, 'artifacts', appId, 'public', 'data', 'productos');
+                cloudSalesRef = fsMod.collection(cloudDb, 'artifacts', appId, 'public', 'data', 'ventas');
+
+                // Escuchar cambios en tiempo real desde cualquier celular o computadora
+                fsMod.onSnapshot(cloudCollectionRef, async (snapshot) => {
+                    if (snapshot.empty) {
+                        // Poblar catálogo inicial la primera vez
+                        for (let i = 0; i < INITIAL_PRODUCTS.length; i++) {
+                            const item = INITIAL_PRODUCTS[i];
+                            await fsMod.setDoc(fsMod.doc(cloudCollectionRef, item.id), { ...item, order: i });
+                        }
+                        return;
+                    }
+
+                    const remoteProducts = [];
+                    snapshot.forEach(docSnap => {
+                        remoteProducts.push(docSnap.data());
+                    });
+
+                    // Ordenar poniendo los nuevos primero
+                    remoteProducts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0) || (a.order || 0) - (b.order || 0));
+                    products = remoteProducts;
+                    cloudReady = true;
+
+                    // Quitar del carrito si otro dispositivo ya compró o eliminó el artículo
+                    cart = cart.filter(itemId => {
+                        const p = products.find(prod => prod.id === itemId);
+                        return p && !p.sold;
+                    });
+
+                    saveState();
+                    renderProducts();
+                    updateCartUI();
+                    if (isDevMode) updateDevPanel();
+                }, (err) => {
+                    console.warn('Modo local activo:', err);
+                });
+
+                // Escuchar ventas en tiempo real
+                fsMod.onSnapshot(cloudSalesRef, (snapshot) => {
+                    const remoteSales = [];
+                    snapshot.forEach(docSnap => remoteSales.push(docSnap.data()));
+                    remoteSales.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    salesHistory = remoteSales;
+                    saveState();
+                    if (isDevMode) updateDevPanel();
+                }, () => {});
+
+            } catch (e) {
+                console.warn('Ejecutando en modo autónomo:', e);
+            }
+        }
+
+        async function syncProductToCloud(productObj) {
+            if (!cloudReady || !cloudCollectionRef || !cloudModules) return;
+            try {
+                await cloudModules.setDoc(cloudModules.doc(cloudCollectionRef, productObj.id), productObj);
+            } catch (e) {
+                console.warn('Error sincronizando producto:', e);
+            }
+        }
+
+        async function deleteProductFromCloud(productId) {
+            if (!cloudReady || !cloudCollectionRef || !cloudModules) return;
+            try {
+                await cloudModules.deleteDoc(cloudModules.doc(cloudCollectionRef, productId));
+            } catch (e) {
+                console.warn('Error eliminando producto en nube:', e);
+            }
+        }
+
+        async function syncSaleToCloud(saleObj) {
+            if (!cloudReady || !cloudSalesRef || !cloudModules) return;
+            try {
+                await cloudModules.setDoc(cloudModules.doc(cloudSalesRef, saleObj.id), saleObj);
+            } catch (e) {
+                console.warn('Error sincronizando venta:', e);
+            }
+        }
+
+        // Exportar archivo HTML actualizado con los productos actuales para subir a Netlify y ver en celular
+        function downloadUpdatedHtmlForHosting() {
+            try {
+                const currentHtml = document.documentElement.outerHTML;
+                const serializedCatalog = JSON.stringify(products, null, 8);
+                const updatedHtml = '<!DOCTYPE html>\n' + currentHtml.replace(
+                    /const INITIAL_PRODUCTS = \[[\s\S]*?\];/,
+                    `const INITIAL_PRODUCTS = ${serializedCatalog};`
+                );
+
+                const blob = new Blob([updatedHtml], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'index.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast('Archivo index.html descargado. Súbelo a Netlify para ver los cambios en cualquier celular.');
+            } catch (err) {
+                showToast('No se pudo generar el archivo.', 'error');
+            }
+        }
+
+        // 3. RENDERIZADO DE NAVEGACIÓN Y FILTROS
+        function renderNavigation() {
+            const desktopNav = document.getElementById('desktop-nav');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const pillFilters = document.getElementById('pill-filters');
+
+            if (desktopNav) desktopNav.innerHTML = '';
+            if (mobileMenu) mobileMenu.innerHTML = '';
+            if (pillFilters) pillFilters.innerHTML = '';
+
+            CATEGORIES.forEach(cat => {
+                const isActive = currentCategory === cat;
+
+                if (desktopNav) {
+                    const dBtn = document.createElement('button');
+                    dBtn.textContent = cat;
+                    dBtn.onclick = () => filterCategory(cat);
+                    dBtn.className = `px-4 py-2 rounded-lg text-sm font-medium transition ${
+                        isActive
+                            ? 'text-gold bg-navyLux border border-gold/40'
+                            : 'text-slate-300 hover:text-gold hover:bg-navyLux/50'
+                    }`;
+                    desktopNav.appendChild(dBtn);
+                }
+
+                if (mobileMenu) {
+                    const mBtn = document.createElement('button');
+                    mBtn.textContent = cat;
+                    mBtn.onclick = () => {
+                        filterCategory(cat);
+                        toggleMobileMenu(false);
+                    };
+                    mBtn.className = `block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition ${
+                        isActive
+                            ? 'bg-navyLux text-gold border border-gold/30'
+                            : 'text-slate-300 hover:bg-navyLux/40 hover:text-gold'
+                    }`;
+                    mobileMenu.appendChild(mBtn);
+                }
+
+                if (pillFilters) {
+                    const pBtn = document.createElement('button');
+                    pBtn.textContent = cat === 'Todos' ? 'Toda la Colección' : cat;
+                    pBtn.onclick = () => filterCategory(cat);
+                    pBtn.className = `px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium tracking-wide transition shadow-sm ${
+                        isActive
+                            ? 'bg-gold text-obsidian font-bold shadow-gold/20 shadow-lg'
+                            : 'bg-navyLux/80 text-slate-200 border border-gold/25 hover:border-gold hover:text-gold'
+                    }`;
+                    pillFilters.appendChild(pBtn);
+                }
+            });
+        }
+
+        function filterCategory(category) {
+            currentCategory = category;
+            const titleEl = document.getElementById('current-category-title');
+            titleEl.textContent = category === 'Todos' ? 'Toda la Colección' : `Colección ${category}`;
+            renderNavigation();
+            renderProducts();
+        }
+
+        function toggleMobileMenu(forceState) {
+            const menu = document.getElementById('mobile-menu');
+            if (typeof forceState === 'boolean') {
+                menu.classList.toggle('hidden', !forceState);
+            } else {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        // 4. RENDERIZADO DE PRODUCTOS
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            const emptyState = document.getElementById('empty-state');
+            const counter = document.getElementById('products-counter');
+
+            let filtered = products.filter(p => currentCategory === 'Todos' || p.category === currentCategory);
+
+            if (!isDevMode) {
+                filtered = filtered.filter(p => !p.sold);
+            }
+
+            grid.innerHTML = '';
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                counter.textContent = '0 piezas disponibles en esta sección';
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            counter.textContent = `Mostrando ${filtered.length} ${filtered.length === 1 ? 'pieza exclusiva' : 'piezas exclusivas'}`;
+
+            filtered.forEach(product => {
+                const isInCart = cart.includes(product.id);
+                const card = document.createElement('article');
+                card.className = `group bg-midnight border ${product.sold ? 'border-rose-500/40 opacity-90' : 'border-gold/20 hover:border-gold/60'} rounded-2xl overflow-hidden flex flex-col transition-all duration-300 shadow-lg hover:shadow-gold/10`;
+
+                card.innerHTML = `
+                    <!-- Imagen con Zoom Suave -->
+                    <div class="relative aspect-[4/3] overflow-hidden bg-obsidian cursor-pointer" onclick="openProductModal('${product.id}')">
+                        <img src="${product.image}" alt="${product.title}" onerror="this.src='https://placehold.co/600x450/0a1122/d4af37?text=LA+HERENCIA'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${product.sold ? 'grayscale brightness-50' : ''}">
+                        
+                        <!-- Etiqueta Categoría -->
+                        <span class="absolute top-3 left-3 bg-obsidian/85 backdrop-blur-sm border border-gold/30 text-gold text-[11px] uppercase tracking-widest px-3 py-1 rounded-full">
+                            ${product.category}
+                        </span>
+
+                        <!-- Botón Eliminar Publicación (Solo visible en Modo Desarrollador / Admin) -->
+                        ${isDevMode ? `
+                            <button onclick="event.stopPropagation(); deleteProduct('${product.id}')" title="Eliminar publicación" class="absolute top-3 right-3 z-20 p-2 rounded-full bg-rose-950/90 border border-rose-500/60 text-rose-300 hover:bg-rose-600 hover:text-white transition shadow-lg">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        ` : ''}
+
+                        <!-- Etiqueta VENDIDO (Solo visible en Modo Desarrollador) -->
+                        ${product.sold ? `
+                            <div class="absolute inset-0 flex items-center justify-center bg-black/40">
+                                <span class="bg-rose-600 text-white font-bold tracking-[0.25em] text-sm px-5 py-2 rounded-lg border-2 border-white/80 shadow-2xl transform -rotate-6">
+                                    VENDIDO
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Información del Artículo -->
+                    <div class="p-5 flex-grow flex flex-col justify-between">
+                        <div>
+                            <p class="text-[11px] text-gold/80 uppercase tracking-wider mb-1">${product.era}</p>
+                            <h4 onclick="openProductModal('${product.id}')" class="font-serif text-xl sm:text-2xl text-white font-semibold leading-snug mb-2 cursor-pointer group-hover:text-gold transition">
+                                ${product.title}
+                            </h4>
+                            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2 mb-4">
+                                ${product.description}
+                            </p>
+                        </div>
+
+                        <div class="pt-4 border-t border-gold/15 flex items-center justify-between gap-2">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase block">Precio Único</span>
+                                <span class="font-serif text-2xl font-bold text-gold">$${Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            </div>
+
+                            ${product.sold ? `
+                                <button onclick="relistProduct('${product.id}')" class="px-3.5 py-2 rounded-xl bg-navyLux border border-gold/40 text-goldLight text-xs hover:bg-gold hover:text-obsidian transition font-medium">
+                                    Republicar Pieza
+                                </button>
+                            ` : `
+                                <div class="flex items-center gap-2">
+                                    <button onclick="openProductModal('${product.id}')" title="Ver Detalles" class="p-2.5 rounded-xl bg-navyLux border border-gold/25 text-slate-300 hover:text-gold hover:border-gold transition">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="addToCart('${product.id}')" ${isInCart ? 'disabled' : ''} class="px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
+                                        isInCart
+                                            ? 'bg-emerald-900/50 border border-emerald-500/40 text-emerald-300 cursor-default'
+                                            : 'bg-gold text-obsidian hover:bg-goldLight shadow-md'
+                                    }">
+                                        <i data-lucide="${isInCart ? 'check' : 'shopping-bag'}" class="w-3.5 h-3.5"></i>
+                                        <span>${isInCart ? 'En Bolsa' : 'Adquirir'}</span>
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // 5. MODAL DE DETALLE DE PRODUCTO
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const isInCart = cart.includes(product.id);
+            const content = document.getElementById('product-modal-content');
+            content.innerHTML = `
+                <div class="bg-obsidian relative aspect-square md:aspect-auto">
+                    <img src="${product.image}" alt="${product.title}" onerror="this.src='https://placehold.co/600x600/0a1122/d4af37?text=LA+HERENCIA'" class="w-full h-full object-cover">
+                    ${product.sold ? `<span class="absolute top-4 left-4 bg-rose-600 text-white text-xs font-bold px-3 py-1 rounded uppercase tracking-widest">Vendido</span>` : ''}
+                </div>
+                <div class="p-6 sm:p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs uppercase tracking-widest text-gold border border-gold/30 px-2.5 py-0.5 rounded-full">${product.category}</span>
+                            <span class="text-xs text-slate-400">${product.era}</span>
+                        </div>
+                        <h3 class="font-serif text-3xl text-white font-bold mb-4">${product.title}</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed mb-6">${product.description}</p>
+                        
+                        <div class="bg-obsidian/70 border border-gold/15 rounded-xl p-4 space-y-2 text-xs text-slate-300 mb-6">
+                            <div class="flex items-center gap-2"><i data-lucide="award" class="w-4 h-4 text-gold"></i> <span>Certificado de autenticidad incluido</span></div>
+                            <div class="flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-gold"></i> <span>Pieza única: se retira del catálogo al comprarse</span></div>
+                            <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-gold"></i> <span>Pago encriptado con tarjeta de crédito o débito</span></div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gold/20 flex items-center justify-between gap-4">
+                        <div>
+                            <span class="text-xs text-slate-400 block">Valor de Colección</span>
+                            <span class="font-serif text-3xl font-bold text-gold">$${Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        ${product.sold ? `
+                            <span class="text-rose-400 font-semibold text-sm">Artículo Vendido (${product.buyerName || 'Cliente'})</span>
+                        ` : `
+                            <button onclick="addToCart('${product.id}'); closeProductModal(); toggleCart(true);" class="px-6 py-3 rounded-xl bg-gold text-obsidian font-bold hover:bg-goldLight transition text-sm flex items-center gap-2 shadow-lg">
+                                <i data-lucide="credit-card" class="w-4 h-4"></i>
+                                <span>${isInCart ? 'Ir a Pagar' : 'Comprar Ahora'}</span>
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('product-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        // 6. GESTIÓN DEL CARRITO DE COMPRAS
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product || product.sold) return;
+
+            if (!cart.includes(productId)) {
+                cart.push(productId);
+                saveState();
+                updateCartUI();
+                renderProducts();
+                showToast(`"${product.title}" añadido a tu bolsa`);
+            }
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(id => id !== productId);
+            saveState();
+            updateCartUI();
+            renderProducts();
+        }
+
+        function updateCartUI() {
+            const badge = document.getElementById('cart-badge');
+            const container = document.getElementById('cart-items-container');
+            const footer = document.getElementById('cart-footer');
+            const totalEl = document.getElementById('cart-total-price');
+
+            badge.textContent = cart.length;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16">
+                        <i data-lucide="shopping-bag" class="w-12 h-12 text-slate-600 mx-auto mb-3"></i>
+                        <p class="font-serif text-xl text-slate-300">Tu bolsa está vacía</p>
+                        <p class="text-xs text-slate-500 mt-1">Explora nuestras piezas exclusivas y selecciona tus favoritas.</p>
+                    </div>
+                `;
+                footer.classList.add('hidden');
+                lucide.createIcons();
+                return;
+            }
+
+            footer.classList.remove('hidden');
+            let total = 0;
+            container.innerHTML = '';
+
+            cart.forEach(id => {
+                const item = products.find(p => p.id === id);
+                if (!item) return;
+                total += Number(item.price);
+
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-3.5 bg-obsidian/70 border border-gold/20 p-3 rounded-xl';
+                row.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}" class="w-16 h-16 rounded-lg object-cover border border-gold/20">
+                    <div class="flex-grow min-w-0">
+                        <span class="text-[10px] text-gold uppercase tracking-wider">${item.category}</span>
+                        <h5 class="font-serif text-base text-white font-semibold truncate">${item.title}</h5>
+                        <p class="text-sm text-gold font-semibold">$${Number(item.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                    </div>
+                    <button onclick="removeFromCart('${item.id}')" class="p-2 text-slate-400 hover:text-rose-400 transition" title="Quitar">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+                container.appendChild(row);
+            });
+
+            totalEl.textContent = `$${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('checkout-final-amount').textContent = totalEl.textContent;
+            lucide.createIcons();
+        }
+
+        function toggleCart(forceOpen) {
+            const drawer = document.getElementById('cart-drawer');
+            const isHidden = drawer.classList.contains('hidden');
+            const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : isHidden;
+
+            if (shouldOpen) {
+                backToCartItems();
+                drawer.classList.remove('hidden');
+            } else {
+                drawer.classList.add('hidden');
+            }
+        }
+
+        // 7. FLUJO DE PAGO CON TARJETA
+        function proceedToCheckout() {
+            if (cart.length === 0) return;
+            document.getElementById('cart-step-items').classList.add('hidden');
+            document.getElementById('cart-step-checkout').classList.remove('hidden');
+            document.getElementById('drawer-title').textContent = 'Pago con Tarjeta';
+            lucide.createIcons();
+        }
+
+        function backToCartItems() {
+            document.getElementById('cart-step-checkout').classList.add('hidden');
+            document.getElementById('cart-step-items').classList.remove('hidden');
+            document.getElementById('drawer-title').textContent = 'Tu Selección';
+        }
+
+        function formatCardNumber(input) {
+            let val = input.value.replace(/\D/g, '').substring(0, 16);
+            input.value = val.replace(/(.{4})/g, '$1 ').trim();
+        }
+
+        function formatExpiry(input) {
+            let val = input.value.replace(/\D/g, '').substring(0, 4);
+            if (val.length >= 3) {
+                input.value = val.substring(0, 2) + '/' + val.substring(2);
+            } else {
+                input.value = val;
+            }
+        }
+
+        function updateCardPreview() {
+            const num = document.getElementById('card-number').value || '•••• •••• •••• ••••';
+            const name = document.getElementById('card-name').value || 'NOMBRE DEL TITULAR';
+            const exp = document.getElementById('card-expiry').value || 'MM/AA';
+
+            document.getElementById('card-preview-number').textContent = num;
+            document.getElementById('card-preview-name').textContent = name.toUpperCase();
+            document.getElementById('card-preview-expiry').textContent = exp;
+        }
+
+        function processCardPayment(e) {
+            e.preventDefault();
+            const btn = document.getElementById('pay-submit-btn');
+            const buyerName = document.getElementById('card-name').value.trim();
+            const cardDigits = document.getElementById('card-number').value.replace(/\s/g, '');
+
+            if (cardDigits.length < 15) {
+                showToast('Por favor ingresa un número de tarjeta válido.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Procesando pago seguro...</span>`;
+            lucide.createIcons();
+
+            setTimeout(async () => {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+                const purchasedTitles = [];
+                let totalAmount = 0;
+
+                for (const itemId of cart) {
+                    const prod = products.find(p => p.id === itemId);
+                    if (prod && !prod.sold) {
+                        prod.sold = true;
+                        prod.soldAt = dateStr;
+                        prod.buyerName = buyerName;
+                        purchasedTitles.push(prod.title);
+                        totalAmount += Number(prod.price);
+                        await syncProductToCloud(prod);
+                    }
+                }
+
+                if (purchasedTitles.length > 0) {
+                    const newSale = {
+                        id: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
+                        buyer: buyerName,
+                        last4: cardDigits.slice(-4),
+                        items: purchasedTitles,
+                        total: totalAmount,
+                        date: dateStr,
+                        timestamp: Date.now()
+                    };
+                    salesHistory.unshift(newSale);
+                    await syncSaleToCloud(newSale);
+                }
+
+                cart = [];
+                saveState();
+
+                document.getElementById('payment-form').reset();
+                updateCardPreview();
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="lock" class="w-4 h-4"></i><span>Confirmar Pago Seguro</span>`;
+
+                toggleCart(false);
+                updateCartUI();
+                renderProducts();
+                if (isDevMode) updateDevPanel();
+
+                showToast('¡Pago aprobado! Tu pieza única ha sido reservada y retirada del catálogo.');
+            }, 900);
+        }
+
+        // 8. MODO DESARROLLADOR / ADMINISTRADOR CON CÓDIGO (0709)
+        function handleDevButtonClick() {
+            if (isSharedClientView) return;
+
+            if (isDevMode) {
+                applyDevModeState(false);
+            } else {
+                const modal = document.getElementById('admin-pin-modal');
+                const input = document.getElementById('admin-pin-input');
+                input.value = '';
+                modal.classList.remove('hidden');
+                setTimeout(() => input.focus(), 50);
+                lucide.createIcons();
+            }
+        }
+
+        function closeAdminPinModal() {
+            document.getElementById('admin-pin-modal').classList.add('hidden');
+            document.getElementById('admin-pin-input').value = '';
+        }
+
+        function verifyAdminPin(e) {
+            e.preventDefault();
+            const enteredPin = document.getElementById('admin-pin-input').value.trim();
+
+            if (enteredPin === ADMIN_ACCESS_PIN) {
+                closeAdminPinModal();
+                applyDevModeState(true);
+            } else {
+                const input = document.getElementById('admin-pin-input');
+                input.value = '';
+                input.focus();
+                showToast('Código incorrecto. Acceso denegado.', 'error');
+            }
+        }
+
+        function applyDevModeState(active) {
+            isDevMode = active;
+            saveState();
+
+            const banner = document.getElementById('dev-banner');
+            const panel = document.getElementById('dev-stats-panel');
+            const btnText = document.getElementById('dev-mode-btn-text');
+
+            if (isDevMode) {
+                banner.classList.remove('hidden');
+                panel.classList.remove('hidden');
+                btnText.textContent = 'Salir de Modo Desarrollador';
+                updateDevPanel();
+                showToast('Acceso concedido: Modo Desarrollador activo.');
+            } else {
+                banner.classList.add('hidden');
+                panel.classList.add('hidden');
+                btnText.textContent = 'Modo Desarrollador / Admin';
+                showToast('Vista de Cliente activada: artículos vendidos ocultos.');
+            }
+
+            renderProducts();
+            lucide.createIcons();
+        }
+
+        function copyShareClientLink() {
+            const url = new URL(window.location.href);
+            url.searchParams.set('cliente', '1');
+            const shareUrl = url.toString();
+
+            const tempInput = document.createElement('input');
+            tempInput.value = shareUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast('Enlace para clientes copiado (sin acceso ni botón de Admin).');
+        }
+
+        function updateDevPanel() {
+            const soldItems = products.filter(p => p.sold);
+            const availableItems = products.filter(p => !p.sold);
+            const totalRevenue = soldItems.reduce((acc, item) => acc + Number(item.price), 0);
+
+            document.getElementById('stat-revenue').textContent = `$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('stat-sold-count').textContent = soldItems.length;
+            document.getElementById('stat-available-count').textContent = availableItems.length;
+
+            const historyList = document.getElementById('sales-history-list');
+            if (salesHistory.length === 0) {
+                historyList.innerHTML = `<p class="text-slate-500 italic text-xs">Aún no se han realizado ventas.</p>`;
+            } else {
+                historyList.innerHTML = salesHistory.map(sale => `
+                    <div class="bg-obsidian/80 border border-gold/15 rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <span class="text-gold font-mono text-xs font-bold">${sale.id}</span>
+                            <span class="text-white font-medium ml-2">${sale.buyer}</span>
+                            <span class="text-slate-400 text-xs ml-1">(•••• ${sale.last4})</span>
+                            <p class="text-xs text-slate-300 mt-0.5">${sale.items.join(', ')}</p>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <span class="text-emerald-400 font-bold text-sm">+$${Number(sale.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            <span class="text-[11px] text-slate-500 block">${sale.date}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function relistProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            product.sold = false;
+            product.soldAt = null;
+            product.buyerName = null;
+            saveState();
+            renderProducts();
+            updateDevPanel();
+            await syncProductToCloud(product);
+            showToast(`"${product.title}" vuelve a estar visible en todos los dispositivos.`);
+        }
+
+        async function deleteProduct(productId) {
+            if (!isDevMode) return;
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            products = products.filter(p => p.id !== productId);
+            cart = cart.filter(id => id !== productId);
+
+            saveState();
+            updateCartUI();
+            renderProducts();
+            updateDevPanel();
+            await deleteProductFromCloud(productId);
+            showToast(`Publicación "${product.title}" eliminada en computadora y celular.`);
+        }
+
+        async function resetDemoStore() {
+            const currentIds = products.map(p => p.id);
+            products = JSON.parse(JSON.stringify(INITIAL_PRODUCTS));
+            salesHistory = [];
+            cart = [];
+            saveState();
+            updateCartUI();
+            renderProducts();
+            updateDevPanel();
+
+            for (const oldId of currentIds) {
+                await deleteProductFromCloud(oldId);
+            }
+            for (let i = 0; i < INITIAL_PRODUCTS.length; i++) {
+                await syncProductToCloud({ ...INITIAL_PRODUCTS[i], order: i });
+            }
+            showToast('Inventario inicial restaurado en todos los dispositivos.');
+        }
+
+        // 9. AGREGAR NUEVO ARTÍCULO (Desarrollador)
+        let uploadedProductImageData = '';
+
+        function openAddProductModal() {
+            uploadedProductImageData = '';
+            const preview = document.getElementById('new-image-preview');
+            const placeholder = document.getElementById('new-image-placeholder');
+            if (preview) {
+                preview.src = '';
+                preview.classList.add('hidden');
+            }
+            if (placeholder) placeholder.classList.remove('hidden');
+            document.getElementById('add-product-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeAddProductModal() {
+            document.getElementById('add-product-modal').classList.add('hidden');
+        }
+
+        function handleProductImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 750;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    uploadedProductImageData = canvas.toDataURL('image/jpeg', 0.78);
+
+                    const preview = document.getElementById('new-image-preview');
+                    const placeholder = document.getElementById('new-image-placeholder');
+                    preview.src = uploadedProductImageData;
+                    preview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function handleAddNewProduct(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-title').value.trim();
+            const category = document.getElementById('new-category').value;
+            const price = parseFloat(document.getElementById('new-price').value);
+            const era = document.getElementById('new-era').value.trim();
+            const image = uploadedProductImageData || 'https://images.unsplash.com/photo-1509048191080-d2984bad6ae5?auto=format&fit=crop&w=800&q=80';
+            const description = document.getElementById('new-desc').value.trim();
+
+            const newProd = {
+                id: 'custom-' + Date.now(),
+                title,
+                category,
+                price,
+                era,
+                image,
+                description,
+                sold: false,
+                soldAt: null,
+                buyerName: null,
+                createdAt: Date.now()
+            };
+
+            products.unshift(newProd);
+            saveState();
+            e.target.reset();
+            uploadedProductImageData = '';
+            closeAddProductModal();
+            renderProducts();
+            updateDevPanel();
+            await syncProductToCloud(newProd);
+            showToast(`"${title}" publicado y actualizado para celular y computadora.`);
+        }
+
+        // 10. UTILIDAD DE NOTIFICACIONES TOAST
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-2xl border text-xs sm:text-sm transition-all duration-300 ${
+                type === 'error'
+                    ? 'bg-rose-950/95 border-rose-500/50 text-rose-200'
+                    : 'bg-navyLux/95 border-gold/50 text-goldLight'
+            }`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'error' ? 'alert-circle' : 'sparkles'}" class="w-4 h-4 text-gold shrink-0"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // 11. INICIALIZACIÓN AL CARGAR LA PÁGINA
+        window.onload = function() {
+            checkSharedClientMode();
+            loadLocalState();
+
+            const devBtn = document.getElementById('dev-mode-btn');
+            if (isSharedClientView && devBtn) {
+                devBtn.classList.add('hidden');
+            }
+
+            renderNavigation();
+            renderProducts();
+            updateCartUI();
+
+            if (isDevMode && !isSharedClientView) {
+                document.getElementById('dev-banner').classList.remove('hidden');
+                document.getElementById('dev-stats-panel').classList.remove('hidden');
+                document.getElementById('dev-mode-btn-text').textContent = 'Salir de Modo Desarrollador';
+                updateDevPanel();
+            }
+
+            lucide.createIcons();
+            initRealtimeCloudSync();
+        };
+    </script>
+</body>
+</html>
